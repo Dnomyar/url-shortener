@@ -12,7 +12,8 @@ lazy val root = (project in file("."))
     name := "Url Shortener",
     libraryDependencies += scalaTest % Test,
     libraryDependencies += "org.typelevel" %% "cats-core" % catsVersion,
-    libraryDependencies += "org.typelevel" %% "cats-effect" % catsVersion
+    libraryDependencies += "org.typelevel" %% "cats-effect" % catsVersion,
+    libraryDependencies += "com.github.cb372" %% "cats-retry" % "2.0.0"
   )
 
 // See https://www.scala-sbt.org/1.x/docs/Using-Sonatype.html for instructions on how to publish to Sonatype.

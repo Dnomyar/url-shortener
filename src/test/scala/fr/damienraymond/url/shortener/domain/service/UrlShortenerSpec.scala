@@ -7,8 +7,13 @@ import fr.damienraymond.url.shortener.domain.repository.FakeShortenedUrlReposito
 import org.scalatest.EitherValues
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import cats.implicits._
+import cats.effect.Timer
+
+import scala.concurrent.ExecutionContext.global
 
 class UrlShortenerSpec extends AnyFlatSpec with Matchers with EitherValues {
+  implicit val timer: Timer[IO] = IO.timer(global)
 
   it should "shorten http://google.com" in {
     for {
