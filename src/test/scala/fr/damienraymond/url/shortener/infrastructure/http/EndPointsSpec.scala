@@ -1,6 +1,7 @@
 package fr.damienraymond.url.shortener.infrastructure.http
 
 import cats.effect.IO
+import fr.damienraymond.url.shortener.domain.model.Url
 import org.http4s.Method.POST
 import org.http4s.Request
 import org.http4s.Status.Ok
@@ -11,7 +12,9 @@ import org.scalatest.matchers.should.Matchers
 class EndPointsSpec extends AnyFlatSpec with Matchers {
 
   it should "shorten a url" in {
-    val response = new EndPoints().routes.run(
+    val Right(base) = Url.fromString("http://localhost:8080")
+
+    val response = new EndPoints(httpPrefix = base).routes.run(
       Request[IO](method = POST, uri = uri"shorten")
         .withEntity(ShortenUrlCommand("http://google.com"))
     ).value.unsafeRunSync().get

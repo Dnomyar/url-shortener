@@ -33,7 +33,7 @@ object ShortenUrlResponse {
   implicit def shortenUrlResponseHttp4sDecoder[F[_]: Sync]: EntityDecoder[F, ShortenUrlResponse] = jsonOf[F, ShortenUrlResponse]
 }
 
-class EndPoints() {
+class EndPoints(httpPrefix: Url) {
 
   val routes = HttpRoutes.of[IO] {
     case POST -> Root / "shorten" =>
