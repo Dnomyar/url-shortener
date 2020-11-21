@@ -20,7 +20,8 @@ class UrlShortenerSpec extends AnyFlatSpec with Matchers with EitherValues {
       repo <- FakeShortenedUrlRepository.make[IO](Map.empty)
       urlShortener = UrlShortener.make[IO](
         shortenedUrlIdGenerator = FakeShortenedUrlIdGenerator.withSameResult("5dK1qw"),
-        shortenedUrlRepository = repo
+        shortenedUrlRepository = repo,
+        numberOfRetriesForDuplicateIds = 0
       )
       Right(url) = Url.fromString("http://google.com")
       shortenedUrl <- urlShortener.shorten(url)
@@ -34,7 +35,8 @@ class UrlShortenerSpec extends AnyFlatSpec with Matchers with EitherValues {
       repo <- FakeShortenedUrlRepository.make[IO](Map(existingShortenedUrl.id -> existingShortenedUrl))
       urlShortener = UrlShortener.make[IO](
         shortenedUrlIdGenerator = FakeShortenedUrlIdGenerator.withSameResult("d0f2DE"),
-        shortenedUrlRepository = repo
+        shortenedUrlRepository = repo,
+        numberOfRetriesForDuplicateIds = 0
       )
       Right(url) = Url.fromString("http://example.com")
       shortenedUrl <- urlShortener.shorten(url)
@@ -48,7 +50,8 @@ class UrlShortenerSpec extends AnyFlatSpec with Matchers with EitherValues {
       repo <- FakeShortenedUrlRepository.make[IO](Map(existingShortenedUrl.id -> existingShortenedUrl))
       urlShortener = UrlShortener.make[IO](
         shortenedUrlIdGenerator = FakeShortenedUrlIdGenerator.withSameResult("5dK1qw"),
-        shortenedUrlRepository = repo
+        shortenedUrlRepository = repo,
+        numberOfRetriesForDuplicateIds = 0
       )
       shortenedUrl <- urlShortener.shorten(url)
     } yield shortenedUrl.right.value should be(existingShortenedUrl)
@@ -65,7 +68,8 @@ class UrlShortenerSpec extends AnyFlatSpec with Matchers with EitherValues {
       repo <- FakeShortenedUrlRepository.make[IO](Map(existingShortenedUrl.id -> existingShortenedUrl))
       urlShortener = UrlShortener.make[IO](
         shortenedUrlIdGenerator = FakeShortenedUrlIdGenerator.withQueueOfResult(sameId, nonExistingId),
-        shortenedUrlRepository = repo
+        shortenedUrlRepository = repo,
+        numberOfRetriesForDuplicateIds = 1
       )
       shortenedUrl <- urlShortener.shorten(url2)
     } yield shortenedUrl.right.value should be(ShortenedUrl(ShortenedUrlId(nonExistingId), url2))

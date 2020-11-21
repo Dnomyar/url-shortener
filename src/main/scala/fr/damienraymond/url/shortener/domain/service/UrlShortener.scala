@@ -13,14 +13,15 @@ trait UrlShortener[F[_]] {
 }
 
 object UrlShortener {
-  def make[F[_]: Sync: Timer](shortenedUrlIdGenerator: ShortenedUrlIdGenerator,
-                       shortenedUrlRepository: ShortenedUrlRepository[F]): UrlShortener[F] = new UrlShortener[F] {
+  def make[F[_] : Sync : Timer](shortenedUrlIdGenerator: ShortenedUrlIdGenerator,
+                                shortenedUrlRepository: ShortenedUrlRepository[F],
+                                numberOfRetriesForDuplicateIds: Int): UrlShortener[F] = new UrlShortener[F] {
     override def shorten(url: Url): F[Either[ExistingIdInRepository, ShortenedUrl]] =
-      shortenedUrlRepository.getByUrl(url).flatMap{
+      shortenedUrlRepository.getByUrl(url).flatMap {
         case Some(shortenedUrl) => shortenedUrl.asRight[ExistingIdInRepository].pure[F]
         case None =>
           retryingM[Either[ExistingIdInRepository, ShortenedUrl]](
-            policy = RetryPolicies.limitRetries[F](5),
+            policy = RetryPolicies.limitRetries[F](numberOfRetriesForDuplicateIds),
             wasSuccessful = _.isRight,
             onFailure = (_, _) => ().pure[F]
           )(createAndSaveShortenedUrl(url))
@@ -28,7 +29,7 @@ object UrlShortener {
 
     private def createAndSaveShortenedUrl(url: Url): F[Either[ExistingIdInRepository, ShortenedUrl]] = {
       val id = shortenedUrlIdGenerator.generate()
-      shortenedUrlRepository.get(id).flatMap{
+      shortenedUrlRepository.get(id).flatMap {
         case Some(_) =>
           ExistingIdInRepository()
             .asLeft[ShortenedUrl]
