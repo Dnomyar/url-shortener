@@ -1,31 +1,32 @@
 package fr.damienraymond.url.shortener.domain.service
 
-import cats.effect.IO
-import cats.effect.concurrent.Ref
+import cats.effect.{IO, Timer}
 import fr.damienraymond.url.shortener.domain.model.{ShortenedUrl, ShortenedUrlId, Url}
 import fr.damienraymond.url.shortener.domain.repository.FakeShortenedUrlRepository
 import org.scalatest.EitherValues
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import cats.implicits._
-import cats.effect.Timer
 
 import scala.concurrent.ExecutionContext.global
 
-class UrlShortenerSpec extends AnyFlatSpec with Matchers with EitherValues {
+class UrlShortenerServiceSpec extends AnyFlatSpec with Matchers with EitherValues {
   implicit val timer: Timer[IO] = IO.timer(global)
 
-  it should "shorten http://google.com" in {
+  it should "shorten and save http://google.com" in {
     for {
       repo <- FakeShortenedUrlRepository.make[IO](Map.empty)
-      urlShortener = UrlShortener.make[IO](
+      urlShortener = UrlShortenerService.make[IO](
         shortenedUrlIdGenerator = FakeShortenedUrlIdGenerator.withSameResult("5dK1qw"),
         shortenedUrlRepository = repo,
         numberOfRetriesForDuplicateIds = 0
       )
       Right(url) = Url.fromString("http://google.com")
       shortenedUrl <- urlShortener.shorten(url)
-    } yield shortenedUrl.right.value should be(ShortenedUrl(ShortenedUrlId("5dK1qw"), url))
+      savedShortenedUrl <- repo.get(ShortenedUrlId("5dK1qw"))
+    } yield {
+      shortenedUrl.right.value should be(ShortenedUrl(ShortenedUrlId("5dK1qw"), url))
+      savedShortenedUrl should contain (ShortenedUrl(ShortenedUrlId("5dK1qw"), url))
+    }
   }.unsafeRunSync()
 
   it should "shorten http://example.com (with existing non related urls in the repository)" in {
@@ -33,7 +34,7 @@ class UrlShortenerSpec extends AnyFlatSpec with Matchers with EitherValues {
     val existingShortenedUrl = ShortenedUrl(ShortenedUrlId("5dK1qw"), url1)
     for {
       repo <- FakeShortenedUrlRepository.make[IO](Map(existingShortenedUrl.id -> existingShortenedUrl))
-      urlShortener = UrlShortener.make[IO](
+      urlShortener = UrlShortenerService.make[IO](
         shortenedUrlIdGenerator = FakeShortenedUrlIdGenerator.withSameResult("d0f2DE"),
         shortenedUrlRepository = repo,
         numberOfRetriesForDuplicateIds = 0
@@ -48,7 +49,7 @@ class UrlShortenerSpec extends AnyFlatSpec with Matchers with EitherValues {
     val existingShortenedUrl = ShortenedUrl(ShortenedUrlId("d0f2DE"), url)
     for {
       repo <- FakeShortenedUrlRepository.make[IO](Map(existingShortenedUrl.id -> existingShortenedUrl))
-      urlShortener = UrlShortener.make[IO](
+      urlShortener = UrlShortenerService.make[IO](
         shortenedUrlIdGenerator = FakeShortenedUrlIdGenerator.withSameResult("5dK1qw"),
         shortenedUrlRepository = repo,
         numberOfRetriesForDuplicateIds = 0
@@ -66,7 +67,7 @@ class UrlShortenerSpec extends AnyFlatSpec with Matchers with EitherValues {
     val existingShortenedUrl = ShortenedUrl(ShortenedUrlId(sameId), url1)
     for {
       repo <- FakeShortenedUrlRepository.make[IO](Map(existingShortenedUrl.id -> existingShortenedUrl))
-      urlShortener = UrlShortener.make[IO](
+      urlShortener = UrlShortenerService.make[IO](
         shortenedUrlIdGenerator = FakeShortenedUrlIdGenerator.withQueueOfResult(sameId, nonExistingId),
         shortenedUrlRepository = repo,
         numberOfRetriesForDuplicateIds = 1

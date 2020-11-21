@@ -6,16 +6,16 @@ import fr.damienraymond.url.shortener.domain.model.{ExistingIdInRepository, Shor
 import fr.damienraymond.url.shortener.domain.repository.ShortenedUrlRepository
 import retry.{RetryPolicies, Sleep, retryingM}
 
-trait UrlShortener[F[_]] {
+trait UrlShortenerService[F[_]] {
 
   def shorten(url: Url): F[Either[ExistingIdInRepository, ShortenedUrl]]
 
 }
 
-object UrlShortener {
+object UrlShortenerService {
   def make[F[_] : Sync : Timer](shortenedUrlIdGenerator: ShortenedUrlIdGenerator,
                                 shortenedUrlRepository: ShortenedUrlRepository[F],
-                                numberOfRetriesForDuplicateIds: Int): UrlShortener[F] = new UrlShortener[F] {
+                                numberOfRetriesForDuplicateIds: Int): UrlShortenerService[F] = new UrlShortenerService[F] {
     override def shorten(url: Url): F[Either[ExistingIdInRepository, ShortenedUrl]] =
       shortenedUrlRepository.getByUrl(url).flatMap {
         case Some(shortenedUrl) => shortenedUrl.asRight[ExistingIdInRepository].pure[F]
@@ -35,9 +35,11 @@ object UrlShortener {
             .asLeft[ShortenedUrl]
             .pure[F]
         case None =>
-          ShortenedUrl(id, url)
-            .asRight[ExistingIdInRepository]
-            .pure[F]
+          val shortenedUrl = ShortenedUrl(id, url)
+          shortenedUrlRepository.save(shortenedUrl) *>
+            shortenedUrl
+              .asRight[ExistingIdInRepository]
+              .pure[F]
       }
     }
   }
