@@ -7,7 +7,9 @@ import cats.implicits._
 import scala.util.{Failure, Success, Try}
 
 case class Url private(url: String) {
-  def slash(str: String): Url = ???
+  def slash(str: String): Url =
+    if (url.endsWith("/")) Url(s"$url$str")
+    else Url(s"$url/$str")
 }
 
 object Url {
