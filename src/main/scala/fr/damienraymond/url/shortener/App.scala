@@ -13,7 +13,7 @@ class App extends IOApp {
     val Right(base) = Url.fromString("http://localhost:8080")
 
     val endPoints = new EndPoints(httpPrefix = base)
-    
+
     BlazeServerBuilder[IO](global)
       .bindHttp(8080, "localhost")
       .withHttpApp(endPoints.routes.orNotFound)

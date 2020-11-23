@@ -6,7 +6,9 @@ import cats.implicits._
 
 import scala.util.{Failure, Success, Try}
 
-case class Url private(url: String)
+case class Url private(url: String) {
+  def slash(str: String): Url = ???
+}
 
 object Url {
   def fromString(url: String): Either[MalformedUrlError, Url] =

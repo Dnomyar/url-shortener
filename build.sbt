@@ -13,6 +13,7 @@ lazy val root = (project in file("."))
   .settings(
     name := "Url Shortener",
     libraryDependencies += scalaTest % Test,
+    libraryDependencies += "org.scalacheck" %% "scalacheck" % "1.15.1" % Test,
     libraryDependencies += "org.typelevel" %% "cats-core" % catsVersion,
     libraryDependencies += "org.typelevel" %% "cats-effect" % catsVersion,
     libraryDependencies += "com.github.cb372" %% "cats-retry" % "2.0.0",
