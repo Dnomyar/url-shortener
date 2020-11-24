@@ -19,7 +19,7 @@ class InMemoryShortenedUrlRepository[F[_]: Applicative](ref: Ref[F, Map[Shortene
 
 
 object InMemoryShortenedUrlRepository {
-  def make[F[_]: Sync](map: Map[ShortenedUrlId, ShortenedUrl]) = {
+  def make[F[_]: Sync](map: Map[ShortenedUrlId, ShortenedUrl]): F[InMemoryShortenedUrlRepository[F]] = {
     for{
       ref <- Ref[F].of(map)
     } yield new InMemoryShortenedUrlRepository[F](ref)

@@ -11,8 +11,11 @@ import org.http4s.server.blaze.BlazeServerBuilder
 import scala.concurrent.ExecutionContext.global
 import scala.util.Random
 
-class App extends IOApp {
-  override def run(args: List[String]): IO[ExitCode] = {
+object App extends IOApp {
+
+  override def run(args: List[String]): IO[ExitCode] = program.as(ExitCode.Success)
+
+  val program: IO[Unit] = {
     val Right(base) = Url.fromString("http://localhost:8080")
     for {
       repo <- InMemoryShortenedUrlRepository.make[IO](Map.empty)
@@ -35,7 +38,6 @@ class App extends IOApp {
         .serve
         .compile
         .drain
-        .as(ExitCode.Success)
 
     } yield server
   }

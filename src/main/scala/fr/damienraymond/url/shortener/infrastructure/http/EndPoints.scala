@@ -23,7 +23,7 @@ class EndPoints(httpPrefix: Url,
           shortenedUrlEither <- urlShortenerService.shorten(url)
           shortenedUrl <- IO.fromEither(shortenedUrlEither)
           resp <- Ok(ShortenUrlResponse(
-            shortenedUrl = httpPrefix.slash(shortenedUrl.id.id).url,
+            shortenedUrl = httpPrefix.slash("go").slash(shortenedUrl.id.id).url,
             originalUrl = shortenedUrl.originalUrl.url
           ))
         } yield resp

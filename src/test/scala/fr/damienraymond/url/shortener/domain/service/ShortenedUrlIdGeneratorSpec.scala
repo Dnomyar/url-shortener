@@ -18,6 +18,13 @@ class ShortenedUrlIdGeneratorSpec extends AnyFlatSpec with Matchers with EitherV
     ShortenedUrlIdGenerator.make(new Random(), sizeToGenerate = 6).generate().id.length should be (6)
   }
 
+  it should "generate two different ids" in {
+    val generator = ShortenedUrlIdGenerator.make(new Random(), sizeToGenerate = 6)
+    val id1 = generator.generate()
+    val id2 = generator.generate()
+    id1 should not be (id2)
+  }
+
   it should "the right id" in {
     ShortenedUrlIdGenerator.make(new FakeRandom(0,1,2,3,4,5), sizeToGenerate = 6).generate().id should be ("abcdef")
   }

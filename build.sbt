@@ -10,10 +10,12 @@ val http4sVersion = "0.21.9"
 val circeVersion = "0.13.0"
 
 lazy val root = (project in file("."))
+  .configs(IntegrationTest)
   .settings(
     name := "Url Shortener",
-    libraryDependencies += scalaTest % Test,
-    libraryDependencies += "org.scalacheck" %% "scalacheck" % "1.15.1" % Test,
+    Defaults.itSettings,
+    libraryDependencies += scalaTest % "it,test",
+    libraryDependencies += "org.scalacheck" %% "scalacheck" % "1.15.1" % "it,test",
     libraryDependencies += "org.typelevel" %% "cats-core" % catsVersion,
     libraryDependencies += "org.typelevel" %% "cats-effect" % catsVersion,
     libraryDependencies += "com.github.cb372" %% "cats-retry" % "2.0.0",
