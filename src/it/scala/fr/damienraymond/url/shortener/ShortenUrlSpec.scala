@@ -25,20 +25,17 @@ class ShortenUrlSpec extends AnyFlatSpec with Matchers {
 
   it should "shorten and redirect" in {
     for {
+      // TODO use resource instead
       app <- App.program.start
-
 
       shortenedUrl <- httpClient.fetchAs[ShortenUrlResponse](
         Request[IO](method = POST, uri = uri"http://localhost:8080/shorten")
           .withEntity(ShortenUrlCommand("http://google.com"))
       )
-
       status <- httpClient.status(Request[IO](method = GET, uri = Uri.unsafeFromString(shortenedUrl.shortenedUrl)))
-
       _ <- IO{
         status should be (PermanentRedirect)
       }
-
       _ <- app.cancel
     } yield ()
   }.unsafeRunSync()
