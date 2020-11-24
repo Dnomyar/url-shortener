@@ -2,7 +2,7 @@ package fr.damienraymond.url.shortener.domain.service
 
 import cats.effect.{IO, Timer}
 import fr.damienraymond.url.shortener.domain.model.{ShortenedUrl, ShortenedUrlId, Url}
-import fr.damienraymond.url.shortener.domain.repository.FakeShortenedUrlRepository
+import fr.damienraymond.url.shortener.domain.repository.InMemoryShortenedUrlRepository
 import org.scalatest.EitherValues
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -14,7 +14,7 @@ class UrlShortenerServiceSpec extends AnyFlatSpec with Matchers with EitherValue
 
   it should "shorten and save http://google.com" in {
     for {
-      repo <- FakeShortenedUrlRepository.make[IO](Map.empty)
+      repo <- InMemoryShortenedUrlRepository.make[IO](Map.empty)
       urlShortener = UrlShortenerService.make[IO](
         shortenedUrlIdGenerator = FakeShortenedUrlIdGenerator.withSameResult("5dK1qw"),
         shortenedUrlRepository = repo,
@@ -33,7 +33,7 @@ class UrlShortenerServiceSpec extends AnyFlatSpec with Matchers with EitherValue
     val Right(url1) = Url.fromString("http://google.com")
     val existingShortenedUrl = ShortenedUrl(ShortenedUrlId("5dK1qw"), url1)
     for {
-      repo <- FakeShortenedUrlRepository.make[IO](Map(existingShortenedUrl.id -> existingShortenedUrl))
+      repo <- InMemoryShortenedUrlRepository.make[IO](Map(existingShortenedUrl.id -> existingShortenedUrl))
       urlShortener = UrlShortenerService.make[IO](
         shortenedUrlIdGenerator = FakeShortenedUrlIdGenerator.withSameResult("d0f2DE"),
         shortenedUrlRepository = repo,
@@ -48,7 +48,7 @@ class UrlShortenerServiceSpec extends AnyFlatSpec with Matchers with EitherValue
     val Right(url) = Url.fromString("http://example.com")
     val existingShortenedUrl = ShortenedUrl(ShortenedUrlId("d0f2DE"), url)
     for {
-      repo <- FakeShortenedUrlRepository.make[IO](Map(existingShortenedUrl.id -> existingShortenedUrl))
+      repo <- InMemoryShortenedUrlRepository.make[IO](Map(existingShortenedUrl.id -> existingShortenedUrl))
       urlShortener = UrlShortenerService.make[IO](
         shortenedUrlIdGenerator = FakeShortenedUrlIdGenerator.withSameResult("5dK1qw"),
         shortenedUrlRepository = repo,
@@ -66,7 +66,7 @@ class UrlShortenerServiceSpec extends AnyFlatSpec with Matchers with EitherValue
     val nonExistingId = "5dK1qw"
     val existingShortenedUrl = ShortenedUrl(ShortenedUrlId(sameId), url1)
     for {
-      repo <- FakeShortenedUrlRepository.make[IO](Map(existingShortenedUrl.id -> existingShortenedUrl))
+      repo <- InMemoryShortenedUrlRepository.make[IO](Map(existingShortenedUrl.id -> existingShortenedUrl))
       urlShortener = UrlShortenerService.make[IO](
         shortenedUrlIdGenerator = FakeShortenedUrlIdGenerator.withQueueOfResult(sameId, nonExistingId),
         shortenedUrlRepository = repo,

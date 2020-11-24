@@ -1,12 +1,12 @@
 package fr.damienraymond.url.shortener.domain.repository
 
 import cats.Applicative
-import cats.effect.{IO, Sync}
+import cats.effect.Sync
 import cats.effect.concurrent.Ref
-import fr.damienraymond.url.shortener.domain.model.{ShortenedUrl, ShortenedUrlId, Url}
 import cats.implicits._
+import fr.damienraymond.url.shortener.domain.model.{ShortenedUrl, ShortenedUrlId, Url}
 
-class FakeShortenedUrlRepository[F[_]: Applicative](ref: Ref[F, Map[ShortenedUrlId, ShortenedUrl]]) extends ShortenedUrlRepository[F] {
+class InMemoryShortenedUrlRepository[F[_]: Applicative](ref: Ref[F, Map[ShortenedUrlId, ShortenedUrl]]) extends ShortenedUrlRepository[F] {
   override def get(id: ShortenedUrlId): F[Option[ShortenedUrl]] =
     ref.get.map(_.get(id))
 
@@ -18,11 +18,11 @@ class FakeShortenedUrlRepository[F[_]: Applicative](ref: Ref[F, Map[ShortenedUrl
 }
 
 
-object FakeShortenedUrlRepository {
+object InMemoryShortenedUrlRepository {
   def make[F[_]: Sync](map: Map[ShortenedUrlId, ShortenedUrl]) = {
     for{
       ref <- Ref[F].of(map)
-    } yield new FakeShortenedUrlRepository[F](ref)
+    } yield new InMemoryShortenedUrlRepository[F](ref)
   }
 }
 

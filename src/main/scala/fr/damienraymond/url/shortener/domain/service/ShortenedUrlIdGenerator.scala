@@ -12,6 +12,8 @@ trait ShortenedUrlIdGenerator {
 
 object ShortenedUrlIdGenerator {
   def make(random: Random, sizeToGenerate: Int): ShortenedUrlIdGenerator = new ShortenedUrlIdGenerator {
-    override def generate(): ShortenedUrlId = ???
+    private val chars: Seq[Char] = ('a' to 'z') ++ ('A' to 'Z') ++ ('0' to '9')
+    override def generate(): ShortenedUrlId =
+      ShortenedUrlId(LazyList.continually(chars(random.nextInt(chars.length))).take(sizeToGenerate).mkString)
   }
 }
